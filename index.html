@@ -16,6 +16,8 @@
       <input type="number" placeholder="Low side temp" required id="lt" value="">
       <input type="number" placeholder="High side temp" required id="ht" value="">
       <br/>
+      <input type="number" placeholder="Design amp" id="da" value="">
+      <input type="number" placeholder="Actual amp" id="aa" value="">
       <button type="reset">Reset</button>
       <button type="submit">Submit</button>
     </form>
@@ -24,12 +26,32 @@
 
     <script type="text/javascript">
       function testForm() {
+        let da = parseFloat(document.getElementById('da').value);
+        let aa = parseFloat(document.getElementById('aa').value);
+
+        let amp;
+
+        let predictamp = activate(parseFloat(document.getElementById('ambient').value),
+                        parseFloat(document.getElementById('sh').value),
+                        parseFloat(document.getElementById('sc').value),
+                        parseFloat(document.getElementById('lt').value),
+                        parseFloat(document.getElementById('ht').value), networkToPredictAmp)[0];
+
+        if (!da || !aa) {
+          amp = predictamp;
+        } else
+          amp = aa / da;
+
+
         let results = activate(parseFloat(document.getElementById('ambient').value),
                         parseFloat(document.getElementById('sh').value),
                         parseFloat(document.getElementById('sc').value),
                         parseFloat(document.getElementById('lt').value),
-                        parseFloat(document.getElementById('ht').value));
+                        parseFloat(document.getElementById('ht').value),
+                        amp);
         document.getElementById('results').innerHTML = `
+        Amp ratio${!da || !aa ? '(predicted)' : ''}: ${Math.round(predictamp * 100) / 100}<br />
+        ${!da || !aa ? '' : 'Actual ratio: ' + Math.round(amp * 100) / 100}<br />
         Undercharge: ${results[0]}%, Overcharge: ${results[1]}%,<br />
         Low Indoor Flow: ${results[2]}%, Dirty coil: ${results[3]}%,<br />
         Restriction: ${results[4]}%, TXV Stuck Open: ${results[5]}%<br />
