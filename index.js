@@ -33,3 +33,4 @@ function evolve() {
 
 
 prep();
+evolve();

@@ -9,6 +9,32 @@
     <script src="index.js"></script>
   </head>
   <body>
+    <form onsubmit="testForm();return false;">
+      <input type="number" placeholder="Ambient" required id="ambient" value="">
+      <input type="number" placeholder="Superheat" required id="sh" value="">
+      <input type="number" placeholder="Subcool" required id="sc" value="">
+      <input type="number" placeholder="Low side temp" required id="lt" value="">
+      <input type="number" placeholder="High side temp" required id="ht" value="">
+      <br/>
+      <button type="reset">Reset</button>
+      <button type="submit">Submit</button>
+    </form>
 
+    <div id="results"></div>
+
+    <script type="text/javascript">
+      function testForm() {
+        let results = activate(parseFloat(document.getElementById('ambient').value),
+                        parseFloat(document.getElementById('sh').value),
+                        parseFloat(document.getElementById('sc').value),
+                        parseFloat(document.getElementById('lt').value),
+                        parseFloat(document.getElementById('ht').value));
+        document.getElementById('results').innerHTML = `
+        Undercharge: ${results[0]}%, Overcharge: ${results[1]}%,<br />
+        Low Indoor Flow: ${results[2]}%, Dirty coil: ${results[3]}%,<br />
+        Restriction: ${results[4]}%, TXV Stuck Open: ${results[5]}%<br />
+        `;
+      }
+    </script>
   </body>
 </html>
