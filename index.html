@@ -3,6 +3,11 @@
   <head>
     <meta charset="utf-8">
 
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="http://marvl.infotech.monash.edu/webcola/cola.v3.min.js"></script>
+    <script src="graph.js"></script>
+    <link rel="stylesheet" type="text/css" href="graph.css">
+
     <script src="neataptic.js"></script>
     <script src="common.js"></script>
     <script src="data.js"></script>
@@ -23,6 +28,8 @@
     </form>
 
     <div id="results"></div>
+
+    <svg class="draw" width="1000px" height="1000px"/>
 
     <script type="text/javascript">
       function testForm() {
@@ -50,7 +57,7 @@
                         parseFloat(document.getElementById('ht').value),
                         amp);
         document.getElementById('results').innerHTML = `
-        Amp ratio${!da || !aa ? '(predicted)' : ''}: ${Math.round(predictamp * 100) / 100}<br />
+        Predicted Amp ratio: ${Math.round(predictamp * 100) / 100}<br />
         ${!da || !aa ? '' : 'Actual ratio: ' + Math.round(amp * 100) / 100}<br />
         Undercharge: ${results[0]}%, Overcharge: ${results[1]}%,<br />
         Low Indoor Flow: ${results[2]}%, Dirty coil: ${results[3]}%,<br />
