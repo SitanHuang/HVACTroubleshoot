@@ -8,7 +8,7 @@ function prep() {
   console.log('Training amperage prediction network.');
   networkToPredictAmp.train(dataToPredictAmperage, {
     log: 1000,
-    error: 0.0001,
+    error: 0.01,
     momentum: 0.7,
     iterations: 100000
   });
