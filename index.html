@@ -15,14 +15,14 @@
   </head>
   <body>
     <form onsubmit="testForm();return false;">
-      <input type="number" placeholder="Ambient" required id="ambient" value="">
-      <input type="number" placeholder="Superheat" required id="sh" value="">
-      <input type="number" placeholder="Subcool" required id="sc" value="">
-      <input type="number" placeholder="Low side temp" required id="lt" value="">
-      <input type="number" placeholder="High side temp" required id="ht" value="">
+      <input type="number" step="any" placeholder="Ambient" required id="ambient" value="">
+      <input type="number" step="any" placeholder="Superheat" required id="sh" value="">
+      <input type="number" step="any" placeholder="Subcool" required id="sc" value="">
+      <input type="number" step="any" placeholder="Low side temp" required id="lt" value="">
+      <input type="number" step="any" placeholder="High side temp" required id="ht" value="">
       <br/>
-      <input type="number" placeholder="Design amp" id="da" value="">
-      <input type="number" placeholder="Actual amp" id="aa" value="">
+      <input type="number" step="any" placeholder="Design amp" id="da" value="">
+      <input type="number" step="any" placeholder="Actual amp" id="aa" value="">
       <button type="reset">Reset</button>
       <button type="submit">Submit</button>
     </form>
