@@ -36,7 +36,12 @@ AMP_MAX = 1;
 98	22	38	15			46	129	11.6	9.3	0.8017241379			1	0	0	0	0	1	0
 105	22	4	10			46	125	1	0.67	0.67			0	0	0	0	0	0	0
 100	22	12	24			46	140	14	18	1.285714286			1	0	1	0	0	1	0
-100	407c	17	7			48	131	14	13.7	0.9785714286			1	0	0	0	0	0.6	0
+##100	407c	17	7			48	131	14	13.7	0.9785714286			1	0.5	0	0	0	0	0
+86	410a	60	0			18	86	1	0.5	0.5			0	1	0	0	0	0	0
+103	22	4	12			36.6	115.2			#DIV/0!			0	0	0	0.5	0	0	0
+87	407c	3.4	6.4			50	96	16.6	11	0.6626506024			0	AMP PREDICTION					AMP PREDICTION
+100	407c	17	7			48	131	14	13.7	0.9785714286			1	AMP PREDICTION					AMP PREDICTION
+95	410a	32	0.7	124.1	349	42	107	12.9	7.5	0.5813953488			0	AMP PREDICTION					AMP PREDICTION
 `.split('\n').forEach(line => {
   if (!line.length) return;
   let tabs = line.split('\t');
@@ -57,10 +62,18 @@ AMP_MAX = 1;
   let restriction = parseFloat(tabs[18]);
   let txvStuckOpen = parseFloat(tabs[19]);
 
-  if (isNaN(ambient) || isNaN(sh) || isNaN(sc) || isNaN(lt) || isNaN(ht) ||
-    isNaN(underCharge) || isNaN(overCharge) || isNaN(lowIndoorFlow) || isNaN(dirtyCoil) || isNaN(restriction) || isNaN(txvStuckOpen))
+  if (isNaN(ambient) || isNaN(sh) || isNaN(sc) || isNaN(lt) || isNaN(ht))
     return;
+  if (amp)
+    dataToPredictAmperage.push({input: [normalize(ambient, AMBIENT_MAX),
+      normalize(sh, SH_MAX),
+      normalize(sc, SC_MAX),
+      normalize(lt, LT_MAX),
+      normalize(ht, HT_MAX)],
+      output: [normalize(amp, AMP_MAX)]});
 
+  if (isNaN(underCharge) || isNaN(overCharge) || isNaN(lowIndoorFlow) || isNaN(dirtyCoil) || isNaN(restriction) || isNaN(txvStuckOpen))
+    return;
   data.push({input: [normalize(ambient, AMBIENT_MAX),
                   normalize(sh, SH_MAX),
                   normalize(sc, SC_MAX),
@@ -68,13 +81,6 @@ AMP_MAX = 1;
                   normalize(ht, HT_MAX),
                   normalize(amp, AMP_MAX)],
              output: [underCharge, overCharge, lowIndoorFlow, dirtyCoil, restriction, txvStuckOpen]});
-  if (amp)
-    dataToPredictAmperage.push({input: [normalize(ambient, AMBIENT_MAX),
-                    normalize(sh, SH_MAX),
-                    normalize(sc, SC_MAX),
-                    normalize(lt, LT_MAX),
-                    normalize(ht, HT_MAX)],
-               output: [normalize(amp, AMP_MAX)]});
 });
 
 function activate(ambient, sh, sc, lt, ht, net) {

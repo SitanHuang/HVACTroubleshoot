@@ -8,8 +8,8 @@ function prep() {
   console.log('Training amperage prediction network.');
   networkToPredictAmp.train(dataToPredictAmperage, {
     log: 1000,
-    error: 0.01,
-    momentum: 0.7,
+    error: 0.001,
+    momentum: 0.5,
     iterations: 100000
   });
   networkToPredictAmp.clear();
@@ -44,7 +44,7 @@ function evolve() {
 
   network.train(data, {
     log: 1000,
-    error: 0.0001,
+    error: 0.001,
     momentum: 0.7,
     iterations: 100000
   });
@@ -55,3 +55,5 @@ function evolve() {
 
 prep();
 evolve();
+
+drawGraph(network.graph(1000, 1000), '.draw');
