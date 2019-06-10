@@ -56,13 +56,26 @@
                         parseFloat(document.getElementById('lt').value),
                         parseFloat(document.getElementById('ht').value),
                         amp);
-        document.getElementById('results').innerHTML = `
-        Predicted Amp ratio: ${Math.round(predictamp * 100) / 100}<br />
-        ${!da || !aa ? '' : 'Actual ratio: ' + Math.round(amp * 100) / 100}<br />
-        Undercharge: ${results[0]}%, Overcharge: ${results[1]}%,<br />
-        Low Indoor Flow: ${results[2]}%, Dirty coil: ${results[3]}%,<br />
-        Restriction: ${results[4]}%, TXV Stuck Open: ${results[5]}%<br />
+        let problem = 'font-weight: bold; color: red;';
+        let warning = 'font-weight: normal; color: orange; opacity: 0.8';
+        let good = 'font-weight: 200; color: green; opacity: 0.6';
+        let html = `
+        <span style="${(!da || !aa) && predictamp > 0.9 ? problem : (!da || !aa) && predictamp > 0.7 ? warning : (!da || !aa) ? good : ''}">Predicted Amp ratio: ${Math.round(predictamp * 100) / 100}</span><br />
+        <span style="${(da && aa) && amp > 0.9 ? problem : (da && aa) && amp > 0.7 ? warning : (da && aa) ? good : ''}">${!da || !aa ? '' : 'Actual ratio: ' + Math.round(amp * 100) / 100}<br /></span><br />
         `;
+        let problems = [];
+        problems.push([results[0], `<span style="${results[0] >= 60 ? problem : results[0] >= 20 ? warning : good};}">Undercharge: ${results[0]}%</span><br />`]);
+        problems.push([results[1], `<span style="${results[1] >= 60 ? problem : results[1] >= 20 ? warning : good};}">Overcharge: ${results[1]}%</span><br />`]);
+        problems.push([results[2], `<span style="${results[2] >= 60 ? problem : results[2] >= 20 ? warning : good};}">Low Indoor Flow: ${results[2]}%</span><br />`]);
+        problems.push([results[3], `<span style="${results[3] >= 60 ? problem : results[3] >= 20 ? warning : good};}">Dirty coil: ${results[3]}%</span><br />`]);
+        problems.push([results[4], `<span style="${results[4] >= 60 ? problem : results[4] >= 20 ? warning : good};}">Restriction: ${results[4]}%</span><br />`]);
+        problems.push([results[5], `<span style="${results[5] >= 60 ? problem : results[5] >= 20 ? warning : good};}">TXV Stuck Open: ${results[5]}%</span><br />`]);
+
+        problems.sort((a, b) => (b[0] - a[0])).forEach(x => {
+          html += x[1];
+        });
+
+        document.getElementById('results').innerHTML = html;
       }
     </script>
   </body>
