@@ -1,5 +1,6 @@
 var network;
 var networkToPredictAmp;
+var networkToPredictCharge;
 
 function prep() {
   let hidden2 = Math.ceil((dataToPredictAmperage[0].input.length + dataToPredictAmperage[0].output.length) / 2);
@@ -19,6 +20,21 @@ function prep() {
     let amp = activate(row[0], row[1], row[2], row[3], row[4], networkToPredictAmp)[0];
     row[5] = normalize(amp, AMP_MAX);
   });
+  
+  dataToPredictCharge.forEach(row => {
+    if (row[5]) return;
+    let amp = activate(row[0], row[1], row[2], row[3], row[4], networkToPredictAmp)[0];
+    row[5] = normalize(amp, AMP_MAX);
+  });
+  
+  console.log('Prep charge prediction network...');
+  
+  let hidden3 = Math.ceil((dataToPredictCharge[0].input.length + dataToPredictCharge[0].output.length) / 2);
+  networkToPredictCharge = new neataptic.Architect.Perceptron(dataToPredictCharge[0].input.length, hidden3, dataToPredictCharge[0].output.length);
+  networkToPredictCharge.clear();
+  console.log(`Input: ${networkToPredictCharge.input}, Hidden: ${hidden3}, Output: ${networkToPredictCharge.output}`);
+  
+  console.log('Prep troubleshooting network...');
 
   let hidden = Math.ceil((data[0].input.length + data[0].output.length) / 2);
   network = new neataptic.Architect.Perceptron(data[0].input.length, hidden, data[0].output.length);
@@ -49,11 +65,18 @@ function evolve() {
     iterations: 100000
   });
 
-  console.log('Done.');
+  console.log('Troubleshooting network done.');
+  
+  networkToPredictCharge.train(dataToPredictCharge, {
+    log: 1000,
+    error: 0.01,
+    momentum: 0.3,
+    iterations: 100000
+  });
+  
+  console.log('Charge prediction network done.');
 }
 
 
 prep();
 evolve();
-
-drawGraph(network.graph(1000, 1000), '.draw');

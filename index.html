@@ -3,11 +3,6 @@
   <head>
     <meta charset="utf-8">
 
-    <script src="http://d3js.org/d3.v3.min.js"></script>
-    <script src="http://marvl.infotech.monash.edu/webcola/cola.v3.min.js"></script>
-    <script src="graph.js"></script>
-    <link rel="stylesheet" type="text/css" href="graph.css">
-
     <script src="neataptic.js"></script>
     <script src="common.js"></script>
     <script src="data.js"></script>
@@ -56,6 +51,20 @@
                         parseFloat(document.getElementById('lt').value),
                         parseFloat(document.getElementById('ht').value),
                         amp);
+                        
+        // Charge prediction ===
+        
+        let chargePredictionHTML = '';
+        if (results[0] >= 20) {
+          let predictCharge = activateChargeNetwork(parseFloat(document.getElementById('ambient').value),
+                        parseFloat(document.getElementById('sh').value),
+                        parseFloat(document.getElementById('sc').value),
+                        parseFloat(document.getElementById('lt').value),
+                        parseFloat(document.getElementById('ht').value),
+                        amp);
+          chargePredictionHTML = `, add ~ ${predictCharge}% charge <form onsubmit="this.innerHTML = Math.round(this.children[0].value * ${predictCharge} / 10) / 10 + 'lbs';return false;"><input type="number" step="0.1"><button type="submit" style="display: none;"></button></form>`;
+        }
+        
         let problem = 'font-weight: bold; color: red;';
         let warning = 'font-weight: normal; color: orange; opacity: 0.8';
         let good = 'font-weight: 200; color: green; opacity: 0.6';
@@ -64,7 +73,7 @@
         <span style="${(da && aa) && amp > 0.9 ? problem : (da && aa) && amp > 0.7 ? warning : (da && aa) ? good : ''}">${!da || !aa ? '' : 'Actual ratio: ' + Math.round(amp * 100) / 100}<br /></span><br />
         `;
         let problems = [];
-        problems.push([results[0], `<span style="${results[0] >= 60 ? problem : results[0] >= 20 ? warning : good};}">Undercharge: ${results[0]}%</span><br />`]);
+        problems.push([results[0], `<span style="${results[0] >= 60 ? problem : results[0] >= 20 ? warning : good};}">Undercharge: ${results[0]}%${chargePredictionHTML}</span><br />`]);
         problems.push([results[1], `<span style="${results[1] >= 60 ? problem : results[1] >= 20 ? warning : good};}">Overcharge: ${results[1]}%</span><br />`]);
         problems.push([results[2], `<span style="${results[2] >= 60 ? problem : results[2] >= 20 ? warning : good};}">Low Indoor Flow: ${results[2]}%</span><br />`]);
         problems.push([results[3], `<span style="${results[3] >= 60 ? problem : results[3] >= 20 ? warning : good};}">Dirty coil: ${results[3]}%</span><br />`]);
