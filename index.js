@@ -77,6 +77,31 @@ function evolve() {
   console.log('Charge prediction network done.');
 }
 
+var log = '';
 
-prep();
-evolve();
+if (localStorage) {
+  var oldVersion = parseFloat(localStorage.dataVer);
+  log += '<span style="color: grey">`localStorage` support found, cached=' + oldVersion + '</span>, <button type="button" onclick="delete localStorage.dataVer;location.reload();">Delete cached network</button><br>';
+  
+  if (oldVersion != DATA_VER) {
+    log += '<span style="color: orange">cache outdated (newVersion=' + DATA_VER + '), training networks live...</span><br>';
+    prep();
+    evolve();
+    
+    localStorage.mainNetworkDump = JSON.stringify(network.toJSON());
+    localStorage.ampNetworkDump = JSON.stringify(networkToPredictAmp.toJSON());
+    localStorage.chargeNetworkDump = JSON.stringify(networkToPredictCharge.toJSON());
+    localStorage.dataVer = DATA_VER.toString();
+  }
+  
+  network = neataptic.Network.fromJSON(JSON.parse(localStorage.mainNetworkDump));
+  networkToPredictAmp = neataptic.Network.fromJSON(JSON.parse(localStorage.ampNetworkDump));
+  networkToPredictCharge = neataptic.Network.fromJSON(JSON.parse(localStorage.chargeNetworkDump));
+  log += '<span style="color: green">Loaded.</span><br>';
+} else {
+  log += '<span style="color: orange">`localStorage` not supported, training networks live...</span><br>';
+  prep();
+  evolve(); 
+}
+
+document.getElementById('console').innerHTML = log;
