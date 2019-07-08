@@ -69,7 +69,7 @@ function evolve() {
   
   networkToPredictCharge.train(dataToPredictCharge, {
     log: 1000,
-    error: 0.01,
+    error: 0.001,
     momentum: 0.3,
     iterations: 100000
   });
