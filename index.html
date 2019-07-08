@@ -64,7 +64,12 @@
                         parseFloat(document.getElementById('lt').value),
                         parseFloat(document.getElementById('ht').value),
                         amp);
-          chargePredictionHTML = `, add ~ ${predictCharge}% charge <form onsubmit="this.innerHTML = Math.round(this.children[0].value * ${predictCharge} / 10) / 10 + 'lbs';return false;"><input type="number" step="0.1"><button type="submit" style="display: none;"></button></form>`;
+          chargePredictionHTML = `, total charge?<form onsubmit="this.innerHTML += '<br>'+this.children[0].value+' : '+Math.round(this.children[0].value * activateChargeNetwork(parseFloat(document.getElementById('ambient').value),
+                        parseFloat(document.getElementById('sh').value),
+                        parseFloat(document.getElementById('sc').value),
+                        parseFloat(document.getElementById('lt').value),
+                        parseFloat(document.getElementById('ht').value),
+                        ${amp}, parseFloat(this.children[0].value)) / 10) / 10 + 'lbs';return false;"><input type="number" step="0.01"><button type="submit" style="display: none;"></button></form>`;
         }
         
         let problem = 'font-weight: bold; color: red;';

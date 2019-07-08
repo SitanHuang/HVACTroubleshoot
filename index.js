@@ -60,7 +60,7 @@ function evolve() {
 
   network.train(data, {
     log: 1000,
-    error: 0.005,
+    error: 0.001,
     momentum: 0.7,
     iterations: 100000
   });
