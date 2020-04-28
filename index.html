@@ -3,96 +3,281 @@
   <head>
     <meta charset="utf-8">
 
+    <title>HVAC Diagnostics Tool</title>
+
     <script src="neataptic.js"></script>
     <script src="common.js"></script>
     <script src="data.js"></script>
+
+    <!-- Compiled and minified CSS -->
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+   <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet">
+
+   <!-- Compiled and minified JavaScript -->
+   <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+    <link rel="stylesheet" href="index.css">
   </head>
   <body>
-    <form onsubmit="testForm();return false;">
-      <input type="number" step="any" placeholder="Ambient" required id="ambient" value="">
-      <input type="number" step="any" placeholder="Superheat" required id="sh" value="">
-      <input type="number" step="any" placeholder="Subcool" required id="sc" value="">
-      <input type="number" step="any" placeholder="Low side temp" required id="lt" value="">
-      <input type="number" step="any" placeholder="High side temp" required id="ht" value="">
-      <br/>
-      <input type="number" step="any" placeholder="Design amp" id="da" value="">
-      <input type="number" step="any" placeholder="Actual amp" id="aa" value="">
-      <button type="reset">Reset</button>
-      <button type="submit">Submit</button>
-    </form>
+    <nav>
+      <div class="nav-wrapper indigo darken-4">
+        <a href="" class="brand-logo center"><span class="material-icons notranslate">
+build
+</span>&nbsp;HVAC-Diagnostics.com</a>
+      </div>
+    </nav>
+    <div class="container">
+      <h5>A Neural Network Powered Diagnostic Tool</h5>
+      <section class="card">
+        <div class="row">
+          <form class="col s12" onsubmit="testForm();return false;">
+            <div class="row">
+              <div class="input-field col s12">
+                <input type="number" step="any" placeholder="Condenser ambient temp." required id="ambient" value="92">
+                <label for="ambient">Ambient Temperature</label>
+              </div>
+            </div>
+            <div class="row">
+              <div class="input-field col s6">
+                <input type="number" step="any" placeholder="Low-side Line Temp - Low Sat temp." required id="sh" value="35">
+                <label for="sh">Superheat</label>
+              </div>
+              <div class="input-field col s6">
+                <input type="number" step="any" placeholder="High Sat temp. - High-side Line Temp" required id="sc" value="15">
+                <label for="sc">Subcool</label>
+              </div>
+            </div>
+            <div class="row">
+              <div class="input-field col s6">
+                <input type="number" step="any" required id="lt" value="29.25" placeholder="based on low-side pressure">
+                <label for="lt">Low saturation temperature</label>
+              </div>
+              <div class="input-field col s6">
+                <input type="number" step="any" required id="ht" value="110.7" placeholder="based on high-side pressure">
+                <label for="ht">High saturation temperature</label>
+              </div>
+            </div><div class="row">
+              <div class="input-field col s6">
+                <input type="number" step="any" placeholder="As shown on nameplate" id="da" value="">
+                <label for="da">Design compressor amperage</label>
+              </div>
+              <div class="input-field col s6">
+                <input type="number" step="any" placeholder="(leave blank if can't be measured)" id="aa" value="">
+                <label for="a">Measured compressor amperage</label>
+              </div>
+            </div>
+            <button class="btn" type="button" onclick="$('input').val('');M.updateTextFields();return true;">Reset</button>
+            <button class="btn" type="submit">Diagnose</button>
+          </form>
+        </div>
+      </section>
+      <div id="modal1" class="modal">
+        <div class="modal-content">
+          <h5>Diagnosis</h5>
+          <div id="results">
 
-    <div id="results"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>
+        </div>
+      </div>
+      <br>
+      <div id="console" style="display: none"></div>
 
-    <br><br><br><br><br><br><br><br><br>
-    <div id="console"></div>
-    
-    <script src="index.js"></script>
+      <script src="index.js"></script>
 
-    <script type="text/javascript">
-      function testForm() {
-        let da = parseFloat(document.getElementById('da').value);
-        let aa = parseFloat(document.getElementById('aa').value);
+      <script type="text/javascript">
+        function testForm() {
+          let da = parseFloat(document.getElementById('da').value);
+          let aa = parseFloat(document.getElementById('aa').value);
 
-        let amp;
+          let amp;
 
-        let predictamp = activate(parseFloat(document.getElementById('ambient').value),
-                        parseFloat(document.getElementById('sh').value),
-                        parseFloat(document.getElementById('sc').value),
-                        parseFloat(document.getElementById('lt').value),
-                        parseFloat(document.getElementById('ht').value), networkToPredictAmp)[0];
+          let predictamp = activate(parseFloat(document.getElementById('ambient').value),
+                          parseFloat(document.getElementById('sh').value),
+                          parseFloat(document.getElementById('sc').value),
+                          parseFloat(document.getElementById('lt').value),
+                          parseFloat(document.getElementById('ht').value), networkToPredictAmp)[0];
 
-        if (!da || !aa) {
-          amp = predictamp;
-        } else
-          amp = aa / da;
+          if (!da || !aa) {
+            amp = predictamp;
+          } else
+            amp = aa / da;
 
 
-        let results = activate(parseFloat(document.getElementById('ambient').value),
-                        parseFloat(document.getElementById('sh').value),
-                        parseFloat(document.getElementById('sc').value),
-                        parseFloat(document.getElementById('lt').value),
-                        parseFloat(document.getElementById('ht').value),
-                        amp);
-                        
-        // Charge prediction ===
-        
-        let chargePredictionHTML = '';
-        if (results[0] >= 20) {
-          let predictCharge = activateChargeNetwork(parseFloat(document.getElementById('ambient').value),
-                        parseFloat(document.getElementById('sh').value),
-                        parseFloat(document.getElementById('sc').value),
-                        parseFloat(document.getElementById('lt').value),
-                        parseFloat(document.getElementById('ht').value),
-                        amp);
-          chargePredictionHTML = `, total charge?<form onsubmit="this.innerHTML += '<br>'+this.children[0].value+' : '+Math.round(this.children[0].value * activateChargeNetwork(parseFloat(document.getElementById('ambient').value),
-                        parseFloat(document.getElementById('sh').value),
-                        parseFloat(document.getElementById('sc').value),
-                        parseFloat(document.getElementById('lt').value),
-                        parseFloat(document.getElementById('ht').value),
-                        ${amp}, parseFloat(this.children[0].value)) / 10) / 10 + 'lbs';return false;"><input type="number" step="0.01"><button type="submit" style="display: none;"></button></form>`;
+          let results = activate(parseFloat(document.getElementById('ambient').value),
+                          parseFloat(document.getElementById('sh').value),
+                          parseFloat(document.getElementById('sc').value),
+                          parseFloat(document.getElementById('lt').value),
+                          parseFloat(document.getElementById('ht').value),
+                          amp);
+
+          // Charge prediction ===
+
+          let chargePredictionHTML = '';
+          if (results[0] >= 20) {
+            let predictCharge = activateChargeNetwork(parseFloat(document.getElementById('ambient').value),
+                          parseFloat(document.getElementById('sh').value),
+                          parseFloat(document.getElementById('sc').value),
+                          parseFloat(document.getElementById('lt').value),
+                          parseFloat(document.getElementById('ht').value),
+                          amp);
+            chargePredictionHTML = `, total charge?<form onsubmit="this.innerHTML += '<br>'+this.children[0].value+' : '+Math.round(this.children[0].value * activateChargeNetwork(parseFloat(document.getElementById('ambient').value),
+                          parseFloat(document.getElementById('sh').value),
+                          parseFloat(document.getElementById('sc').value),
+                          parseFloat(document.getElementById('lt').value),
+                          parseFloat(document.getElementById('ht').value),
+                          ${amp}, parseFloat(this.children[0].value)) / 10) / 10 + 'lbs';return false;"><input type="number" step="0.01"><button type="submit" style="display: none;"></button></form>`;
+          }
+
+          let problem = 'font-weight: bold; color: red;';
+          let warning = 'font-weight: normal; color: orange; opacity: 0.8';
+          let good = 'font-weight: 200; color: green; opacity: 0.6';
+          let xp = ``;
+          let html = `
+          <span style="${(!da || !aa) && predictamp > 0.9 ? problem : (!da || !aa) && predictamp > 0.7 ? warning : (!da || !aa) ? good : ''}">Predicted Amp ratio: ${Math.round(predictamp * 100) / 100}</span>
+          <span style="${(da && aa) && amp > 0.9 ? problem : (da && aa) && amp > 0.7 ? warning : (da && aa) ? good : ''}">${!da || !aa ? '' : 'Actual ratio: ' + Math.round(amp * 100) / 100}<br /></span>
+          `;
+          if (((!da || !aa) && predictamp > 0.9) || ((da && aa) && amp > 0.9)) { // red
+            xp += '<p>The amperage ratio is very high. Check condenser coil cleanliness. Recommend replacing compressor.</p>';
+          } else if (((!da || !aa) && predictamp > 0.7) || ((da && aa) && amp > 0.7)) { // warning
+            xp += '<p>The amperage ratio is high. If condenser coil is dirty, rinse with pressured water. </p>';
+          } else if ((!da || !aa) || (da && aa)) { // good
+            xp += '<p>The amperage ratio is normal.</p>';
+          }
+          let problems = [];
+          problems.push([results[0], `<span style="${results[0] >= 60 ? problem : results[0] >= 20 ? warning : good};">Undercharge: ${results[0]}%${chargePredictionHTML}</span><br />`]);
+          problems.push([results[1], `<span style="${results[1] >= 60 ? problem : results[1] >= 20 ? warning : good};">Overcharge: ${results[1]}%</span><br />`]);
+          problems.push([results[2], `<span style="${results[2] >= 60 ? problem : results[2] >= 20 ? warning : good};">Low Indoor Flow: ${results[2]}%</span><br />`]);
+          problems.push([results[3], `<span style="${results[3] >= 60 ? problem : results[3] >= 20 ? warning : good};">Dirty coil: ${results[3]}%</span><br />`]);
+          problems.push([results[4], `<span style="${results[4] >= 60 ? problem : results[4] >= 20 ? warning : good};">Restriction: ${results[4]}%</span><br />`]);
+          problems.push([results[5], `<span style="${results[5] >= 60 ? problem : results[5] >= 20 ? warning : good};">TXV Stuck Open: ${results[5]}%</span><br />`]);
+
+          if (results[4] >= 60) {
+            xp += '<p>Check TXV and filter drier restriction.</p>';
+          } else if (results[4] >= 20) {
+            xp += '<p>Check proper indoor air flow, TXV bulb location and filter drier restriction.</p>';
+          }
+          if (results[0] >= 60) {
+            xp += '<p>Unit is undercharged. Add refrigerant until subcool is normal and retest.</p>';
+          } else if (results[0] >= 20) {
+            xp += '<p>Unit might be undercharged. Add refrigerant until subcool is normal and retest..</p>';
+          }
+          if (results[1] >= 60) {
+            xp += '<p>Unit is heavily overcharged. Recover freon and retest.</p>';
+          } else if (results[1] >= 20) {
+            xp += '<p>Unit might be slightly overcharged.</p>';
+          }
+          if (results[3] >= 60) {
+            xp += '<p>Poor subcool performance. Check condenser coil cleanliness. Recommend replacing condenser unit</p>';
+          } else if (results[3] >= 20) {
+            xp += '<p>Check condenser coil cleanliness.</p>';
+          }
+
+          problems.sort((a, b) => (b[0] - a[0])).filter(x => x[0] >= 20).forEach(x => {
+            html += x[1];
+          });
+
+          if (problems.sort((a, b) => (b[0] - a[0])).filter(x => x[0] >= 20).length == 0) {
+            xp += '<p>Unit is running normal.</p>'
+          } else if (problems.sort((a, b) => (b[0] - a[0])).filter(x => x[0] >= 60).length == 0) {
+            xp += '<p>Unit is running okay.</p>'
+          }
+
+          document.getElementById('results').innerHTML = html + xp;
+
+          $('.modal').modal('open');
+
+          return false;
         }
-        
-        let problem = 'font-weight: bold; color: red;';
-        let warning = 'font-weight: normal; color: orange; opacity: 0.8';
-        let good = 'font-weight: 200; color: green; opacity: 0.6';
-        let html = `
-        <span style="${(!da || !aa) && predictamp > 0.9 ? problem : (!da || !aa) && predictamp > 0.7 ? warning : (!da || !aa) ? good : ''}">Predicted Amp ratio: ${Math.round(predictamp * 100) / 100}</span><br />
-        <span style="${(da && aa) && amp > 0.9 ? problem : (da && aa) && amp > 0.7 ? warning : (da && aa) ? good : ''}">${!da || !aa ? '' : 'Actual ratio: ' + Math.round(amp * 100) / 100}<br /></span><br />
-        `;
-        let problems = [];
-        problems.push([results[0], `<span style="${results[0] >= 60 ? problem : results[0] >= 20 ? warning : good};}">Undercharge: ${results[0]}%${chargePredictionHTML}</span><br />`]);
-        problems.push([results[1], `<span style="${results[1] >= 60 ? problem : results[1] >= 20 ? warning : good};}">Overcharge: ${results[1]}%</span><br />`]);
-        problems.push([results[2], `<span style="${results[2] >= 60 ? problem : results[2] >= 20 ? warning : good};}">Low Indoor Flow: ${results[2]}%</span><br />`]);
-        problems.push([results[3], `<span style="${results[3] >= 60 ? problem : results[3] >= 20 ? warning : good};}">Dirty coil: ${results[3]}%</span><br />`]);
-        problems.push([results[4], `<span style="${results[4] >= 60 ? problem : results[4] >= 20 ? warning : good};}">Restriction: ${results[4]}%</span><br />`]);
-        problems.push([results[5], `<span style="${results[5] >= 60 ? problem : results[5] >= 20 ? warning : good};}">TXV Stuck Open: ${results[5]}%</span><br />`]);
+        $(function () {$('.modal').modal();})
+      </script>
+      <div class="markdown-preview" data-use-github-style='data-use-github-style'>
+        <p>Hi, I’m Sitan Huang, a technician at BruceAC LLC and a computer programmer.</p>
+        <p>978494543.qq54@gmail.com</p>
+        <p><a href="https://github.com/SitanHuang/">My Github Profile</a></p>
+        <h3 id="why-use-it">Why use it?</h3>
+        <p>Accurate fault diagnosing reduces cost and increases profit. Troubleshooting HVAC systems requires not only a thorough understanding of the HVAC system, but also relies heavily on the experiences of the technician. This is an easy-to-use diagnostic helper that gives the probabilities of each fault based on your inputs.</p>
+        <p>At our company, the tool is especially useful to new recruits. Rather than consulting senior techs for difficult cases, our apprentices can access this tool on their phone and give accurate diagnoses.</p>
+        <p><b>This is a system in development and requires more data collection for more accurate results.</b></p>
+        <h3 id="how-does-it-work">How does it work?</h3>
+        <p>A Neural Network learns from real life diagnoses that our technicians collected. Each data entry contains the basic pressure and temperature measurements as well as the fix applied to that system. If the applied fix puts the system back to normal, we can certainly deduce the fault of the system.</p>
+        <p>For example:</p>
+        <table>
+        <thead>
+        <tr class="header">
+        <th>Fix</th>
+        <th align="left">Fault</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr class="odd">
+        <td>Added refrigerant</td>
+        <td align="left">System undercharged</td>
+        </tr>
+        <tr class="even">
+        <td>Replaced air filters</td>
+        <td align="left">Low indoor flow</td>
+        </tr>
+        <tr class="odd">
+        <td>Cleaned coil</td>
+        <td align="left">Dirty coil</td>
+        </tr>
+        <tr class="even">
+        <td>Replaced filter drier</td>
+        <td align="left">Restriction</td>
+        </tr>
+        <tr class="odd">
+        <td>…</td>
+        <td align="left">…</td>
+        </tr>
+        </tbody>
+        </table>
+        <p>There may be cases of multiple fixes applied. These cases are especially valuable since they allow my neural network to learn to find multiple faults in one diagnosis.</p>
+        <h3 id="the-architecture">The Architecture</h3>
+        <p>All neural networks in this tool are Perceptron networks. They have 3 layers: input, hidden and output. Input and output values are normalized between -1 and 1.</p>
+        <p>The number of hidden layers is determined using this formula:</p>
+        <pre><code>CEIL((# of Inputs + # of Outputs) / 2)</code></pre>
+        <h4 id="the-main-network">The Main network</h4>
+        <p>The main network yields probabilities of each fault from ambient temperature, saturation temperatures, line temperatures and amperage ratio. </p>
+<h4 id="the-amperage-network">The Amperage network</h4>
+<p>In case amperage cannot be measured, the amperage network predicts the amperage ratio from all other inputs. The network is trained with data containing temperature and pressure measurements as well as the actual measured amperage ratio.</p>
+<h4 id="the-freon-charge-estimate-network">The Freon Charge Estimate network</h4>
+<p>In case of a refrigerant undercharge case, the network predicts the amount of refrigerant needed, in pounds, based on the system factory charge and all other measurements. The network is trained with data containing temperature and pressure measurements as well as the actual weight of refrigerant added.</p>
 
-        problems.sort((a, b) => (b[0] - a[0])).forEach(x => {
-          html += x[1];
-        });
+      </div>
+      <br><br>
+  </div>
+  <footer class="page-footer indigo darken-4">
+      <div class="container">
+        <div class="row">
+          <div class="col l6 s12">
+            <h5 class="white-text">Sitan Huang</h5>
+            <p class="grey-text text-lighten-4">
+              Artificial Intelligence Enthusiast and
+              Technician at <a href="http://bruceac.com" class="grey-text text-lighten-3">BruceAC LLC.</a>
+            </p>
+          </div>
+          <div class="col l4 offset-l2 s12">
+            <h5 class="white-text">Links</h5>
+            <ul>
+              <li>- <a class="grey-text text-lighten-3" href="mailto:978494543.qq54@gmail.com">978494543.qq54@gmail.com</a></li>
+              <li>- <a class="grey-text text-lighten-3" href="https://github.com/SitanHuang">Github</a></li>
+              <li>- <a class="grey-text text-lighten-3" href="https://www.youtube.com/channel/UC7mJCXvtX8yU5LU0UH-ZpTA">Youtube Channel</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="footer-copyright">
+        <div class="container">
+        © 2020 Sitan Huang
+        </div>
+      </div>
+    </footer>
 
-        document.getElementById('results').innerHTML = html;
-      }
-    </script>
   </body>
 </html>
