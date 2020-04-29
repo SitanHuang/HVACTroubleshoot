@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-  <head>
+<html lang="en" dir="ltr"><head>
     <meta charset="utf-8">
 
     <title>HVAC Diagnostics Tool</title>
@@ -12,19 +11,23 @@
     <!-- Compiled and minified CSS -->
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
 
-   <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
-      rel="stylesheet">
+   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
    <!-- Compiled and minified JavaScript -->
+   <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="cola.min.js"></script>
    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+   <script src="https://rawgit.com/wagenaartje/neataptic/master/graph/graph.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://rawgit.com/wagenaartje/neataptic/master/graph/graph.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <link rel="stylesheet" href="index.css">
   </head>
   <body>
     <nav>
       <div class="nav-wrapper indigo darken-4">
-        <a href="" class="brand-logo center"><span class="material-icons notranslate">
+        <a href="" class="brand-logo center" style="width: 100%"><span class="material-icons notranslate">
 build
 </span>&nbsp;HVAC-Diagnostics.com</a>
       </div>
@@ -36,45 +39,45 @@ build
           <form class="col s12" onsubmit="testForm();return false;">
             <div class="row">
               <div class="input-field col s12">
-                <input type="number" step="any" placeholder="Condenser ambient temp." required id="ambient" value="92">
-                <label for="ambient">Ambient Temperature</label>
+                <input type="number" step="any" placeholder="Condenser ambient temp." required="" id="ambient" value="92">
+                <label for="ambient" class="active">Ambient Temperature</label>
               </div>
             </div>
             <div class="row">
               <div class="input-field col s6">
-                <input type="number" step="any" placeholder="Low-side Line Temp - Low Sat temp." required id="sh" value="35">
-                <label for="sh">Superheat</label>
+                <input type="number" step="any" placeholder="Low-side Line Temp - Low Sat temp." required="" id="sh" value="35">
+                <label for="sh" class="active">Superheat</label>
               </div>
               <div class="input-field col s6">
-                <input type="number" step="any" placeholder="High Sat temp. - High-side Line Temp" required id="sc" value="15">
-                <label for="sc">Subcool</label>
+                <input type="number" step="any" placeholder="High Sat temp. - High-side Line Temp" required="" id="sc" value="15">
+                <label for="sc" class="active">Subcool</label>
               </div>
             </div>
             <div class="row">
               <div class="input-field col s6">
-                <input type="number" step="any" required id="lt" value="29.25" placeholder="based on low-side pressure">
-                <label for="lt">Low saturation temperature</label>
+                <input type="number" step="any" required="" id="lt" value="29.25" placeholder="based on low-side pressure">
+                <label for="lt" class="active">Low saturation temp.</label>
               </div>
               <div class="input-field col s6">
-                <input type="number" step="any" required id="ht" value="110.7" placeholder="based on high-side pressure">
-                <label for="ht">High saturation temperature</label>
+                <input type="number" step="any" required="" id="ht" value="110.7" placeholder="based on high-side pressure">
+                <label for="ht" class="active">High saturation temp.</label>
               </div>
             </div><div class="row">
               <div class="input-field col s6">
                 <input type="number" step="any" placeholder="As shown on nameplate" id="da" value="">
-                <label for="da">Design compressor amperage</label>
+                <label for="da" class="active">Design amperage</label>
               </div>
               <div class="input-field col s6">
                 <input type="number" step="any" placeholder="(leave blank if can't be measured)" id="aa" value="">
-                <label for="a">Measured compressor amperage</label>
+                <label for="a" class="active">Measured amperage</label>
               </div>
             </div>
-            <button class="btn" type="button" onclick="$('input').val('');M.updateTextFields();return true;">Reset</button>
-            <button class="btn" type="submit">Diagnose</button>
+            <button class="btn grey" type="button" onclick="$('input').val('');M.updateTextFields();return true;">Reset</button>&nbsp;
+            <button class="btn btn-floating" style="background: #26a69a !important;border-radius: 2px;width: auto;height: 36px;line-height: 36px;padding: 0 16px;" type="submit">Diagnose</button>
           </form>
         </div>
       </section>
-      <div id="modal1" class="modal">
+      <div id="modal1" class="modal" tabindex="0">
         <div class="modal-content">
           <h5>Diagnosis</h5>
           <div id="results">
@@ -86,7 +89,7 @@ build
         </div>
       </div>
       <br>
-      <div id="console" style="display: none"></div>
+      <div id="console" style="display: none"><span style="color: grey">`localStorage` support found, cached=19.071</span>, <button type="button" onclick="delete localStorage.dataVer;location.reload();">Delete cached network</button><br><span style="color: green">Loaded.</span><br></div>
 
       <script src="index.js"></script>
 
@@ -194,9 +197,18 @@ build
 
           return false;
         }
-        $(function () {$('.modal').modal();})
+        $(function () {
+          $('.modal').modal();
+          $('svg').attr('width', $('.container').width())
+          if (drawGraph)
+            drawGraph(network.graph($('.container').width(), 500), '.draw');
+          else
+            $('svg').remove();
+        })
       </script>
-      <div class="markdown-preview" data-use-github-style='data-use-github-style'>
+      <!-- <svg class="draw" height=500> -->
+      <img src="1.png" alt="Representation of the main Neural Network" class="responsive-img">
+      <div class="markdown-preview" data-use-github-style="data-use-github-style">
         <p>Hi, I’m Sitan Huang, a technician at BruceAC LLC and a computer programmer.</p>
         <p>978494543.qq54@gmail.com</p>
         <p><a target="_blank" href="https://github.com/SitanHuang/">My Github Profile</a></p>
@@ -279,5 +291,6 @@ build
       </div>
     </footer>
 
-  </body>
-</html>
+
+
+</body></html>
